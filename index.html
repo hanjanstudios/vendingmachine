@@ -3,82 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pick a Can — Hannah Janicke</title>
-<meta name="description" content="A HANJAN vending machine. Press a button, grab a can, see where it takes you.">
+<title>Hannah Janicke — Pick a Can</title>
+<meta name="description" content="Type a code, press OK, click your can — a vending machine that links to Hannah Janicke's projects.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Yellowtail&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div class="noise" aria-hidden="true"></div>
-
-<div class="sky" aria-hidden="true">
-  <div class="confetti" id="confetti"></div>
-</div>
-
-<header class="page-header">
-  <p class="eyebrow">Hi, I'm Hannah —</p>
-  <h1 class="headline">pick a can.</h1>
-  <p class="sub">Press the button. Grab the soda. See where it fizzes off to.</p>
+<header class="hero">
+  <h1 class="brand-outline">
+    <span>Hannah</span>
+    <span>Janicke</span>
+  </h1>
+  <p class="hint">select your destination ↓</p>
 </header>
 
-<main class="scene-wrap" id="sceneWrap">
-  <div class="ground ground-back" aria-hidden="true"></div>
-  <div class="ground ground-front" aria-hidden="true"></div>
-  <div class="stage" id="stage">
+<main class="machine-wrap">
+  <div class="machine">
+    <div class="machine-trim" aria-hidden="true"></div>
+    <h2 class="wordmark-outline">HANJAN</h2>
 
-    <div class="machine-shadow" aria-hidden="true"></div>
+    <div class="panels">
+      <div class="panel panel-cans">
+        <div class="cans-grid" id="cansGrid"><!-- cans injected --></div>
+        <p class="status-strip" id="statusStrip">enter code to dispense</p>
+      </div>
 
-    <div class="body">
-      <div class="cabinet-shine" aria-hidden="true"></div>
-
-      <div class="wrap" id="wrap">
-        <div class="droplets" id="droplets" aria-hidden="true"></div>
-        <div class="swoosh swoosh-1" aria-hidden="true"></div>
-        <div class="swoosh swoosh-2" aria-hidden="true"></div>
-
-        <div class="brand-badge" aria-hidden="true">FRESH<br>PICKS</div>
-
-        <div class="wordmark-block">
-          <h2 class="wordmark">HANJAN</h2>
-          <p class="tagline">press · click · go</p>
+      <div class="panel panel-controls">
+        <div class="display-block">
+          <p class="display-label">✦ display ✦</p>
+          <div class="lcd" id="lcd">INSERT CODE</div>
         </div>
-
-        <div class="windows" id="cansRow"><!-- windows + cans injected --></div>
-
-        <div class="button-row" id="buttonRow"><!-- buttons injected --></div>
-        <div class="code-row" id="codeRow" aria-hidden="true"><!-- B1..B5 injected --></div>
-
-        <div class="decal" aria-hidden="true">sip. click.<br>repeat.</div>
-      </div>
-
-      <div class="coinmech">
-        <div class="led-display" aria-hidden="true"><span>PICK</span></div>
-        <p class="coinmech-label" aria-hidden="true">INSERT&nbsp;LINK</p>
-        <div class="coin-slot" aria-hidden="true"></div>
-        <div class="lock" aria-hidden="true"></div>
-        <div class="coin-return" aria-hidden="true"></div>
+        <div class="keypad" id="keypad"><!-- keys injected --></div>
+        <div class="menu">
+          <p class="menu-title">— menu —</p>
+          <ul class="menu-list" id="menuList"><!-- items injected --></ul>
+        </div>
       </div>
     </div>
 
-    <div class="kickplate">
-      <div class="tray" id="tray">
-        <p class="tray-hint" id="trayHint">Tray's empty — press a button ↑</p>
-        <a class="tray-chip" id="trayChip" href="#" target="_blank" rel="noopener" hidden></a>
-      </div>
+    <div class="tray">
+      <p class="tray-label">collection tray</p>
+      <p class="tray-message" id="trayMessage" hidden></p>
     </div>
 
-    <div class="leg leg-left" aria-hidden="true"></div>
-    <div class="leg leg-right" aria-hidden="true"></div>
-
-    <div class="falling-can" id="fallingCan" aria-hidden="true" hidden></div>
+    <div class="feet" aria-hidden="true">
+      <span class="foot"></span>
+      <span class="foot"></span>
+    </div>
   </div>
 </main>
 
-<footer class="page-footer">
-  <p>Made by hand, mostly. &copy; <span id="year"></span> Hannah Janicke.</p>
+<footer class="instructions">
+  type a code (A1–A6) → press OK → click your can
 </footer>
 
 <script src="js/main.js"></script>

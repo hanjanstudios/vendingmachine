@@ -1,219 +1,232 @@
 /* ============================================================
-   Pick a Can — low-poly vending machine
-   Can/button data, responsive stage scaling, dispense animation.
+   Hannah Janicke — vending machine
+   Type a code (A1–A6), press OK, click your can.
    No build step, no external JS.
 
    NOTE: swap every url: '#' below for the real destination once
-   you have it. Everything else (flavor names, colors, order) can
-   be edited here without touching the HTML/CSS.
+   you have it — including confirming what "TOOL" (A2) should
+   actually link to.
    ============================================================ */
 
-const CANS = [
-  {
-    id: 'cherry',
-    name: 'Cherry Bliss',
-    tool: 'ArtForge',
-    main: '#ff4d6d', light: '#ff9db0', dark: '#c62b48',
-    url: '#',
-  },
-  {
-    id: 'lime',
-    name: 'Lime Rush',
-    tool: 'ArtLab',
-    main: '#7ed957', light: '#c1f2a8', dark: '#4c9a2a',
-    url: '#',
-  },
-  {
-    id: 'grape',
-    name: 'Grape Static',
-    tool: 'Coloring Book Spacer',
-    main: '#8c52ff', light: '#c6a8ff', dark: '#5e28c2',
-    url: '#',
-  },
-  {
-    id: 'razz',
-    name: 'Blue Razz',
-    tool: 'Realtor AI',
-    main: '#3fa9ff', light: '#a3d9ff', dark: '#1f6fb8',
-    url: '#',
-  },
-  {
-    id: 'sunny',
-    name: 'Sunny Crush',
-    tool: 'Blog',
-    main: '#ffb443', light: '#ffdca0', dark: '#d98a1a',
-    url: 'https://hannahjanicke.com',
-  },
+const ITEMS = [
+  { code: 'A1', label: 'BLOG', color: '#d9362c', ink: '#fff', url: 'https://hannahjanicke.com' },
+  { code: 'A2', label: 'TOOL', color: '#2f6fb3', ink: '#fff', url: '#' },
+  { code: 'A3', label: 'ARTLAB', color: '#e8842a', ink: '#fff', url: '#' },
+  { code: 'A4', label: 'REALTY', color: '#2f7d4f', ink: '#fff', url: '#' },
+  { code: 'A5', label: 'PDFSPACE', color: '#7c3fa1', ink: '#fff', url: '#' },
+  { code: 'A6', label: 'ARTFORGE', color: '#e0b93c', ink: '#1c1c1c', url: '#' },
 ];
 
-function canGradient(c) {
-  return `linear-gradient(100deg, ${c.light} 0%, ${c.light} 16%, ${c.main} 16%, ${c.main} 78%, ${c.dark} 78%, ${c.dark} 100%)`;
-}
+const KEYS = ['A', 'B', 'C', '1', '2', '3', '4', '5', '6', '⌫', '0', 'OK'];
 
-/* ---------- Build windows, buttons + code labels ---------- */
-const cansRow = document.getElementById('cansRow');
-const buttonRow = document.getElementById('buttonRow');
-const codeRow = document.getElementById('codeRow');
-const canEls = {};
-const btnEls = {};
+const cansGrid = document.getElementById('cansGrid');
+const keypad = document.getElementById('keypad');
+const menuList = document.getElementById('menuList');
+const lcd = document.getElementById('lcd');
+const statusStrip = document.getElementById('statusStrip');
+const tray = document.querySelector('.tray');
+const trayMessage = document.getElementById('trayMessage');
 
-CANS.forEach((c, i) => {
-  const win = document.createElement('div');
-  win.className = 'window';
-
-  const can = document.createElement('div');
-  can.className = 'can';
-  can.id = `can-${c.id}`;
-  can.style.background = canGradient(c);
-  can.setAttribute('aria-hidden', 'true');
-  win.appendChild(can);
-  cansRow.appendChild(win);
-  canEls[c.id] = can;
-
-  const btn = document.createElement('button');
-  btn.className = 'btn-can';
-  btn.type = 'button';
-  btn.style.setProperty('--main', c.main);
-  btn.style.setProperty('--dark', c.dark);
-  btn.setAttribute('aria-label', `Get a ${c.name} can — links to ${c.tool}`);
-  btn.addEventListener('pointerenter', () => highlightCan(c.id, c.light));
-  btn.addEventListener('pointerleave', () => unhighlightCan(c.id));
-  btn.addEventListener('focus', () => highlightCan(c.id, c.light));
-  btn.addEventListener('blur', () => unhighlightCan(c.id));
-  btn.addEventListener('click', () => dispense(c));
-  buttonRow.appendChild(btn);
-  btnEls[c.id] = btn;
-
-  const code = document.createElement('span');
-  code.className = 'code-chip';
-  code.textContent = `B${i + 1}`;
-  codeRow.appendChild(code);
-});
-
-function highlightCan(id, glow) {
-  const can = canEls[id];
-  can.classList.add('is-highlight');
-  can.style.setProperty('--glow', glow);
-}
-function unhighlightCan(id) {
-  canEls[id].classList.remove('is-highlight');
-}
-
-/* ---------- Dispense flow ---------- */
-const stage = document.getElementById('stage');
-const fallingCan = document.getElementById('fallingCan');
-const tray = document.getElementById('tray');
-const trayHint = document.getElementById('trayHint');
-const trayChip = document.getElementById('trayChip');
+const cellByCode = {};
+let buffer = '';
+let armedCode = null;
+let lcdRevertTimer = null;
+let trayRevertTimer = null;
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-let busy = false;
 
-function dispense(c) {
-  if (busy) return;
-  busy = true;
-  Object.values(btnEls).forEach((b) => (b.disabled = true));
+/* ---------- Build cans ---------- */
+ITEMS.forEach((item) => {
+  const cell = document.createElement('button');
+  cell.type = 'button';
+  cell.className = 'can-cell';
+  cell.dataset.code = item.code;
+  cell.setAttribute('aria-label', `${item.label}, code ${item.code}`);
 
-  const btn = btnEls[c.id];
+  const can = document.createElement('span');
+  can.className = 'can';
+  can.style.setProperty('--can', item.color);
+  can.style.setProperty('--can-ink', item.ink);
+
+  const cap = document.createElement('span');
+  cap.className = 'can-cap';
+  can.appendChild(cap);
+
+  const label = document.createElement('span');
+  label.className = 'can-label';
+  label.textContent = item.label;
+  can.appendChild(label);
+
+  const code = document.createElement('span');
+  code.className = 'can-code';
+  code.textContent = item.code;
+
+  cell.appendChild(can);
+  cell.appendChild(code);
+  cell.addEventListener('click', () => onCanClick(item, cell));
+  cansGrid.appendChild(cell);
+  cellByCode[item.code] = cell;
+});
+
+/* ---------- Build menu ---------- */
+ITEMS.forEach((item) => {
+  const li = document.createElement('li');
+  const swatch = document.createElement('span');
+  swatch.className = 'menu-swatch';
+  swatch.style.background = item.color;
+  const code = document.createElement('span');
+  code.className = 'menu-code';
+  code.textContent = item.code;
+  const label = document.createElement('span');
+  label.textContent = item.label;
+  li.append(swatch, code, label);
+  menuList.appendChild(li);
+});
+
+/* ---------- Build keypad ---------- */
+KEYS.forEach((k) => {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'key';
+  if (k === 'OK') btn.classList.add('key-ok');
+  if (k === '⌫') btn.classList.add('key-back');
+  btn.textContent = k;
+  btn.setAttribute('aria-label', k === '⌫' ? 'Backspace' : k === 'OK' ? 'Submit code' : `Key ${k}`);
+  btn.addEventListener('click', () => onKey(k, btn));
+  keypad.appendChild(btn);
+});
+
+function onKey(k, btn) {
   btn.classList.add('is-pressed');
-  setTimeout(() => btn.classList.remove('is-pressed'), 160);
+  setTimeout(() => btn.classList.remove('is-pressed'), 120);
 
-  const can = canEls[c.id];
-  can.classList.add('is-dispensed');
+  if (k === '⌫') {
+    buffer = buffer.slice(0, -1);
+    renderLcd();
+    return;
+  }
+  if (k === 'OK') {
+    submitCode();
+    return;
+  }
+  if (buffer.length < 2) {
+    buffer += k;
+    renderLcd();
+  }
+}
+
+function renderLcd() {
+  clearTimeout(lcdRevertTimer);
+  lcd.classList.remove('is-invalid');
+  lcd.textContent = buffer || 'INSERT CODE';
+}
+
+function flashLcd(text, opts = {}) {
+  clearTimeout(lcdRevertTimer);
+  lcd.textContent = text;
+  lcd.classList.toggle('is-invalid', !!opts.invalid);
+  lcdRevertTimer = setTimeout(() => {
+    lcd.classList.remove('is-invalid');
+    renderLcd();
+  }, opts.duration || 1400);
+}
+
+function submitCode() {
+  const item = ITEMS.find((i) => i.code === buffer.toUpperCase());
+  buffer = '';
+  if (!item) {
+    flashLcd('INVALID CODE', { invalid: true });
+    return;
+  }
+  armCan(item);
+}
+
+function armCan(item) {
+  if (armedCode && cellByCode[armedCode]) {
+    cellByCode[armedCode].classList.remove('is-armed');
+  }
+  armedCode = item.code;
+  cellByCode[item.code].classList.add('is-armed');
+  flashLcd(`${item.code} READY`, { duration: 2200 });
+  statusStrip.textContent = `${item.label} unlocked — click the can`;
+}
+
+function onCanClick(item, cell) {
+  if (armedCode !== item.code) {
+    cell.classList.add('is-shake');
+    setTimeout(() => cell.classList.remove('is-shake'), 320);
+    flashLcd('ENTER CODE FIRST', { invalid: true, duration: 1400 });
+    return;
+  }
+  dispense(item, cell);
+}
+
+function dispense(item, cell) {
+  armedCode = null;
+  cell.classList.remove('is-armed');
+  statusStrip.textContent = 'enter code to dispense';
+
+  const openLink = () => {
+    if (item.url && item.url !== '#') window.open(item.url, '_blank', 'noopener');
+    showTrayMessage(`enjoy your ${item.label.toLowerCase()}!`);
+  };
 
   if (reducedMotion) {
-    finishDispense(c);
+    openLink();
     return;
   }
 
-  const stageRect = stage.getBoundingClientRect();
-  const canRect = can.getBoundingClientRect();
+  const canEl = cell.querySelector('.can');
+  const startRect = canEl.getBoundingClientRect();
   const trayRect = tray.getBoundingClientRect();
-  const scale = stageRect.width / stage.offsetWidth || 1;
 
-  const startLeft = (canRect.left - stageRect.left) / scale;
-  const startTop = (canRect.top - stageRect.top) / scale;
-  const endLeft = (trayRect.left - stageRect.left) / scale + trayRect.width / scale / 2 - 28;
-  const endTop = (trayRect.top - stageRect.top) / scale + 4;
+  const flying = document.createElement('div');
+  flying.className = 'flying-can';
+  flying.style.background = item.color;
+  flying.style.width = `${startRect.width}px`;
+  flying.style.height = `${startRect.height}px`;
+  flying.style.left = `${startRect.left}px`;
+  flying.style.top = `${startRect.top}px`;
+  flying.style.transform = 'rotate(0deg)';
+  document.body.appendChild(flying);
 
-  fallingCan.style.background = canGradient(c);
-  fallingCan.style.left = `${startLeft}px`;
-  fallingCan.style.top = `${startTop}px`;
-  fallingCan.style.transform = 'rotate(0deg)';
-  fallingCan.style.opacity = '1';
-  fallingCan.hidden = false;
+  const endLeft = trayRect.left + trayRect.width / 2 - startRect.width / 2;
+  const endTop = trayRect.top + trayRect.height / 2 - startRect.height / 2;
 
   requestAnimationFrame(() => {
-    fallingCan.style.transition = 'top 0.6s cubic-bezier(.4,0,.7,1), left 0.6s cubic-bezier(.4,0,.7,1), transform 0.6s ease-out';
-    fallingCan.style.left = `${endLeft}px`;
-    fallingCan.style.top = `${endTop}px`;
-    fallingCan.style.transform = 'rotate(340deg)';
+    flying.style.transition = 'left 0.55s cubic-bezier(.4,0,.7,1), top 0.55s cubic-bezier(.4,0,.7,1), transform 0.55s ease-out, opacity 0.2s 0.4s';
+    flying.style.left = `${endLeft}px`;
+    flying.style.top = `${endTop}px`;
+    flying.style.transform = 'rotate(320deg)';
+    flying.style.opacity = '0';
   });
 
   setTimeout(() => {
-    fallingCan.style.transition = 'opacity 0.25s';
-    fallingCan.style.opacity = '0';
-    setTimeout(() => {
-      fallingCan.hidden = true;
-      finishDispense(c);
-    }, 250);
-  }, 620);
+    flying.remove();
+    openLink();
+  }, 560);
 }
 
-function finishDispense(c) {
-  trayHint.hidden = true;
-  trayChip.hidden = false;
-  trayChip.href = c.url;
-  trayChip.textContent = `🥤 ${c.name} — tap to open →`;
-  trayChip.style.animation = 'none';
-  requestAnimationFrame(() => { trayChip.style.animation = ''; });
-
-  Object.values(btnEls).forEach((b) => (b.disabled = false));
-  busy = false;
+function showTrayMessage(text) {
+  clearTimeout(trayRevertTimer);
+  trayMessage.textContent = text;
+  trayMessage.hidden = false;
+  trayMessage.style.animation = 'none';
+  requestAnimationFrame(() => { trayMessage.style.animation = ''; });
+  trayRevertTimer = setTimeout(() => { trayMessage.hidden = true; }, 3000);
 }
 
-/* ---------- Confetti ---------- */
-const confettiWrap = document.getElementById('confetti');
-const confettiColors = ['#ff8fa3', '#8ff5e8', '#ffd58a', '#c6a8ff', '#a3d9ff'];
-for (let i = 0; i < 14; i++) {
-  const el = document.createElement('div');
-  const isTri = i % 2 === 0;
-  el.className = `confetto ${isTri ? 'tri' : 'dot'}`;
-  el.style.left = `${Math.random() * 100}%`;
-  el.style.top = `${Math.random() * 70 + 5}%`;
-  el.style.setProperty('--c', confettiColors[i % confettiColors.length]);
-  el.style.setProperty('--dur', `${5 + Math.random() * 5}s`);
-  el.style.setProperty('--delay', `${Math.random() * 4}s`);
-  confettiWrap.appendChild(el);
-}
+/* ---------- Physical keyboard passthrough ---------- */
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key.toUpperCase();
+  if (['A', 'B', 'C', '0', '1', '2', '3', '4', '5', '6'].includes(k)) {
+    onKey(k);
+  } else if (e.key === 'Backspace') {
+    onKey('⌫');
+  } else if (e.key === 'Enter') {
+    onKey('OK');
+  }
+});
 
-/* ---------- Droplets ---------- */
-const dropletsWrap = document.getElementById('droplets');
-for (let i = 0; i < 22; i++) {
-  const el = document.createElement('div');
-  el.className = 'droplet';
-  const size = 3 + Math.random() * 7;
-  el.style.width = `${size}px`;
-  el.style.height = `${size * (1.2 + Math.random() * 0.6)}px`;
-  el.style.left = `${Math.random() * 96}%`;
-  el.style.top = `${Math.random() * 96}%`;
-  el.style.opacity = `${0.3 + Math.random() * 0.4}`;
-  dropletsWrap.appendChild(el);
-}
-
-/* ---------- Responsive stage scaling ---------- */
-const sceneWrap = document.getElementById('sceneWrap');
-const STAGE_W = 540;
-const STAGE_H = 980;
-
-function fitStage() {
-  const available = Math.min(sceneWrap.clientWidth - 20, STAGE_W);
-  const scale = Math.max(0.5, Math.min(1, available / STAGE_W));
-  stage.style.setProperty('--scale', scale);
-  sceneWrap.style.height = `${STAGE_H * scale + 20}px`;
-}
-
-window.addEventListener('resize', fitStage);
-fitStage();
-
-document.getElementById('year').textContent = new Date().getFullYear();
+renderLcd();
