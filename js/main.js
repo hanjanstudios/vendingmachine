@@ -50,19 +50,24 @@ function canGradient(c) {
   return `linear-gradient(100deg, ${c.light} 0%, ${c.light} 16%, ${c.main} 16%, ${c.main} 78%, ${c.dark} 78%, ${c.dark} 100%)`;
 }
 
-/* ---------- Build cans + buttons ---------- */
+/* ---------- Build windows, buttons + code labels ---------- */
 const cansRow = document.getElementById('cansRow');
 const buttonRow = document.getElementById('buttonRow');
+const codeRow = document.getElementById('codeRow');
 const canEls = {};
 const btnEls = {};
 
 CANS.forEach((c, i) => {
+  const win = document.createElement('div');
+  win.className = 'window';
+
   const can = document.createElement('div');
   can.className = 'can';
   can.id = `can-${c.id}`;
   can.style.background = canGradient(c);
   can.setAttribute('aria-hidden', 'true');
-  cansRow.appendChild(can);
+  win.appendChild(can);
+  cansRow.appendChild(win);
   canEls[c.id] = can;
 
   const btn = document.createElement('button');
@@ -71,7 +76,6 @@ CANS.forEach((c, i) => {
   btn.style.setProperty('--main', c.main);
   btn.style.setProperty('--dark', c.dark);
   btn.setAttribute('aria-label', `Get a ${c.name} can — links to ${c.tool}`);
-  btn.innerHTML = `<span class="btn-label">A${i + 1}</span>`;
   btn.addEventListener('pointerenter', () => highlightCan(c.id, c.light));
   btn.addEventListener('pointerleave', () => unhighlightCan(c.id));
   btn.addEventListener('focus', () => highlightCan(c.id, c.light));
@@ -79,6 +83,11 @@ CANS.forEach((c, i) => {
   btn.addEventListener('click', () => dispense(c));
   buttonRow.appendChild(btn);
   btnEls[c.id] = btn;
+
+  const code = document.createElement('span');
+  code.className = 'code-chip';
+  code.textContent = `B${i + 1}`;
+  codeRow.appendChild(code);
 });
 
 function highlightCan(id, glow) {
@@ -178,10 +187,24 @@ for (let i = 0; i < 14; i++) {
   confettiWrap.appendChild(el);
 }
 
+/* ---------- Droplets ---------- */
+const dropletsWrap = document.getElementById('droplets');
+for (let i = 0; i < 22; i++) {
+  const el = document.createElement('div');
+  el.className = 'droplet';
+  const size = 3 + Math.random() * 7;
+  el.style.width = `${size}px`;
+  el.style.height = `${size * (1.2 + Math.random() * 0.6)}px`;
+  el.style.left = `${Math.random() * 96}%`;
+  el.style.top = `${Math.random() * 96}%`;
+  el.style.opacity = `${0.3 + Math.random() * 0.4}`;
+  dropletsWrap.appendChild(el);
+}
+
 /* ---------- Responsive stage scaling ---------- */
 const sceneWrap = document.getElementById('sceneWrap');
-const STAGE_W = 560;
-const STAGE_H = 860;
+const STAGE_W = 540;
+const STAGE_H = 980;
 
 function fitStage() {
   const available = Math.min(sceneWrap.clientWidth - 20, STAGE_W);

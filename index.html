@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pick a Can — Hannah Janicke</title>
-<meta name="description" content="A low-poly vending machine. Press a button, grab a can, see where it takes you.">
+<meta name="description" content="A HANJAN vending machine. Press a button, grab a can, see where it takes you.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Yellowtail&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -31,31 +31,36 @@
 
     <div class="machine-shadow" aria-hidden="true"></div>
 
-    <div class="roof">
-      <span class="light" id="powerLight" aria-hidden="true"></span>
-    </div>
-
     <div class="body">
-      <div class="body-shade" aria-hidden="true"></div>
-      <div class="body-shine" aria-hidden="true"></div>
+      <div class="cabinet-shine" aria-hidden="true"></div>
 
-      <div class="header-plate">
-        <span class="brand">SODA CO.</span>
+      <div class="wrap" id="wrap">
+        <div class="droplets" id="droplets" aria-hidden="true"></div>
+        <div class="swoosh swoosh-1" aria-hidden="true"></div>
+        <div class="swoosh swoosh-2" aria-hidden="true"></div>
+
+        <div class="brand-badge" aria-hidden="true">FRESH<br>PICKS</div>
+
+        <div class="wordmark-block">
+          <h2 class="wordmark">HANJAN</h2>
+          <p class="tagline">press · click · go</p>
+        </div>
+
+        <div class="windows" id="cansRow"><!-- windows + cans injected --></div>
+
+        <div class="button-row" id="buttonRow"><!-- buttons injected --></div>
+        <div class="code-row" id="codeRow" aria-hidden="true"><!-- B1..B5 injected --></div>
+
+        <div class="decal" aria-hidden="true">sip. click.<br>repeat.</div>
       </div>
 
-      <div class="glass" id="glass">
-        <div class="glass-shine" aria-hidden="true"></div>
-        <div class="shelf" id="cansRow"><!-- cans injected --></div>
-      </div>
-
-      <div class="deco-row">
+      <div class="coinmech">
+        <div class="led-display" aria-hidden="true"><span>PICK</span></div>
+        <p class="coinmech-label" aria-hidden="true">INSERT&nbsp;LINK</p>
         <div class="coin-slot" aria-hidden="true"></div>
-        <div class="card-reader" aria-hidden="true"></div>
+        <div class="lock" aria-hidden="true"></div>
+        <div class="coin-return" aria-hidden="true"></div>
       </div>
-
-      <div class="button-row" id="buttonRow"><!-- buttons injected --></div>
-
-      <div class="flap" aria-hidden="true"></div>
     </div>
 
     <div class="kickplate">
