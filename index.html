@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pick a Can — Hannah Janicke</title>
+<meta name="description" content="A low-poly vending machine. Press a button, grab a can, see where it takes you.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="noise" aria-hidden="true"></div>
+
+<div class="sky" aria-hidden="true">
+  <div class="confetti" id="confetti"></div>
+</div>
+
+<header class="page-header">
+  <p class="eyebrow">Hi, I'm Hannah —</p>
+  <h1 class="headline">pick a can.</h1>
+  <p class="sub">Press the button. Grab the soda. See where it fizzes off to.</p>
+</header>
+
+<main class="scene-wrap" id="sceneWrap">
+  <div class="ground ground-back" aria-hidden="true"></div>
+  <div class="ground ground-front" aria-hidden="true"></div>
+  <div class="stage" id="stage">
+
+    <div class="machine-shadow" aria-hidden="true"></div>
+
+    <div class="roof">
+      <span class="light" id="powerLight" aria-hidden="true"></span>
+    </div>
+
+    <div class="body">
+      <div class="body-shade" aria-hidden="true"></div>
+      <div class="body-shine" aria-hidden="true"></div>
+
+      <div class="header-plate">
+        <span class="brand">SODA CO.</span>
+      </div>
+
+      <div class="glass" id="glass">
+        <div class="glass-shine" aria-hidden="true"></div>
+        <div class="shelf" id="cansRow"><!-- cans injected --></div>
+      </div>
+
+      <div class="deco-row">
+        <div class="coin-slot" aria-hidden="true"></div>
+        <div class="card-reader" aria-hidden="true"></div>
+      </div>
+
+      <div class="button-row" id="buttonRow"><!-- buttons injected --></div>
+
+      <div class="flap" aria-hidden="true"></div>
+    </div>
+
+    <div class="kickplate">
+      <div class="tray" id="tray">
+        <p class="tray-hint" id="trayHint">Tray's empty — press a button ↑</p>
+        <a class="tray-chip" id="trayChip" href="#" target="_blank" rel="noopener" hidden></a>
+      </div>
+    </div>
+
+    <div class="leg leg-left" aria-hidden="true"></div>
+    <div class="leg leg-right" aria-hidden="true"></div>
+
+    <div class="falling-can" id="fallingCan" aria-hidden="true" hidden></div>
+  </div>
+</main>
+
+<footer class="page-footer">
+  <p>Made by hand, mostly. &copy; <span id="year"></span> Hannah Janicke.</p>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
