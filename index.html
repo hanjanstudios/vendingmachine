@@ -45,8 +45,11 @@
     </div>
 
     <div class="tray">
-      <p class="tray-label">collection tray</p>
-      <p class="tray-message" id="trayMessage" hidden></p>
+      <p class="tray-label" id="trayLabel">collection tray</p>
+      <div class="tray-can-wrap" id="trayCanWrap" hidden>
+        <button class="tray-can" id="trayCan" type="button"></button>
+        <span class="tray-can-hint">tap to open</span>
+      </div>
     </div>
 
     <div class="feet" aria-hidden="true">
@@ -57,7 +60,7 @@
 </main>
 
 <footer class="instructions">
-  type a code (A1–A6) → press OK → click your can
+  type a code (A1–A6) → press OK → click the can in the tray
 </footer>
 
 <script src="js/main.js"></script>

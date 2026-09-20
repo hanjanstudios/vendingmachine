@@ -1,6 +1,7 @@
 /* ============================================================
    Hannah Janicke — vending machine
-   Type a code (A1–A6), press OK, click your can.
+   Type a code (A1–A6), press OK — the can drops into the tray.
+   Click the can in the tray to open its link.
    No build step, no external JS.
 
    NOTE: swap every url: '#' below for the real destination once
@@ -25,23 +26,23 @@ const menuList = document.getElementById('menuList');
 const lcd = document.getElementById('lcd');
 const statusStrip = document.getElementById('statusStrip');
 const tray = document.querySelector('.tray');
-const trayMessage = document.getElementById('trayMessage');
+const trayLabel = document.getElementById('trayLabel');
+const trayCanWrap = document.getElementById('trayCanWrap');
+const trayCan = document.getElementById('trayCan');
 
 const cellByCode = {};
 let buffer = '';
-let armedCode = null;
+let busy = false;
+let currentTrayItem = null;
 let lcdRevertTimer = null;
-let trayRevertTimer = null;
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- Build cans ---------- */
 ITEMS.forEach((item) => {
-  const cell = document.createElement('button');
-  cell.type = 'button';
+  const cell = document.createElement('div');
   cell.className = 'can-cell';
   cell.dataset.code = item.code;
-  cell.setAttribute('aria-label', `${item.label}, code ${item.code}`);
 
   const can = document.createElement('span');
   can.className = 'can';
@@ -63,7 +64,6 @@ ITEMS.forEach((item) => {
 
   cell.appendChild(can);
   cell.appendChild(code);
-  cell.addEventListener('click', () => onCanClick(item, cell));
   cansGrid.appendChild(cell);
   cellByCode[item.code] = cell;
 });
@@ -132,49 +132,29 @@ function flashLcd(text, opts = {}) {
 }
 
 function submitCode() {
+  if (busy) return;
+  if (!buffer) return;
   const item = ITEMS.find((i) => i.code === buffer.toUpperCase());
   buffer = '';
   if (!item) {
     flashLcd('INVALID CODE', { invalid: true });
     return;
   }
-  armCan(item);
+  dropIntoTray(item);
 }
 
-function armCan(item) {
-  if (armedCode && cellByCode[armedCode]) {
-    cellByCode[armedCode].classList.remove('is-armed');
-  }
-  armedCode = item.code;
-  cellByCode[item.code].classList.add('is-armed');
-  flashLcd(`${item.code} READY`, { duration: 2200 });
-  statusStrip.textContent = `${item.label} unlocked — click the can`;
-}
-
-function onCanClick(item, cell) {
-  if (armedCode !== item.code) {
-    cell.classList.add('is-shake');
-    setTimeout(() => cell.classList.remove('is-shake'), 320);
-    flashLcd('ENTER CODE FIRST', { invalid: true, duration: 1400 });
-    return;
-  }
-  dispense(item, cell);
-}
-
-function dispense(item, cell) {
-  armedCode = null;
-  cell.classList.remove('is-armed');
-  statusStrip.textContent = 'enter code to dispense';
-
-  const openLink = () => {
-    if (item.url && item.url !== '#') window.open(item.url, '_blank', 'noopener');
-    showTrayMessage(`enjoy your ${item.label.toLowerCase()}!`);
-  };
+function dropIntoTray(item) {
+  const cell = cellByCode[item.code];
+  flashLcd(`${item.code} DISPENSING`, { duration: 1800 });
+  statusStrip.textContent = `${item.label} is dropping…`;
 
   if (reducedMotion) {
-    openLink();
+    placeInTray(item);
     return;
   }
+
+  busy = true;
+  cell.classList.add('is-launching');
 
   const canEl = cell.querySelector('.can');
   const startRect = canEl.getBoundingClientRect();
@@ -194,7 +174,7 @@ function dispense(item, cell) {
   const endTop = trayRect.top + trayRect.height / 2 - startRect.height / 2;
 
   requestAnimationFrame(() => {
-    flying.style.transition = 'left 0.55s cubic-bezier(.4,0,.7,1), top 0.55s cubic-bezier(.4,0,.7,1), transform 0.55s ease-out, opacity 0.2s 0.4s';
+    flying.style.transition = 'left 0.55s cubic-bezier(.4,0,.7,1), top 0.55s cubic-bezier(.4,0,.7,1), transform 0.55s ease-out, opacity 0.15s 0.4s';
     flying.style.left = `${endLeft}px`;
     flying.style.top = `${endTop}px`;
     flying.style.transform = 'rotate(320deg)';
@@ -203,18 +183,36 @@ function dispense(item, cell) {
 
   setTimeout(() => {
     flying.remove();
-    openLink();
+    cell.classList.remove('is-launching');
+    placeInTray(item);
+    busy = false;
   }, 560);
 }
 
-function showTrayMessage(text) {
-  clearTimeout(trayRevertTimer);
-  trayMessage.textContent = text;
-  trayMessage.hidden = false;
-  trayMessage.style.animation = 'none';
-  requestAnimationFrame(() => { trayMessage.style.animation = ''; });
-  trayRevertTimer = setTimeout(() => { trayMessage.hidden = true; }, 3000);
+function placeInTray(item) {
+  currentTrayItem = item;
+  trayLabel.hidden = true;
+  trayCanWrap.hidden = false;
+  trayCanWrap.style.animation = 'none';
+  requestAnimationFrame(() => { trayCanWrap.style.animation = ''; });
+
+  trayCan.style.setProperty('--can', item.color);
+  trayCan.style.setProperty('--can-ink', item.ink);
+  trayCan.dataset.label = item.label;
+  trayCan.setAttribute('aria-label', `Open ${item.label}`);
+
+  renderLcd();
+  statusStrip.textContent = `${item.label} in the tray — click it →`;
 }
+
+trayCan.addEventListener('click', () => {
+  if (!currentTrayItem) return;
+  if (currentTrayItem.url && currentTrayItem.url !== '#') {
+    window.open(currentTrayItem.url, '_blank', 'noopener');
+  }
+  trayCan.classList.add('is-clicked');
+  setTimeout(() => trayCan.classList.remove('is-clicked'), 200);
+});
 
 /* ---------- Physical keyboard passthrough ---------- */
 document.addEventListener('keydown', (e) => {

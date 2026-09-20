@@ -145,15 +145,12 @@ button { font: inherit; }
   gap: 8px;
 }
 .can-cell {
-  all: unset;
-  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 5px;
   padding: 8px 2px;
   border-radius: 8px;
-  transition: transform 0.2s var(--ease-soft);
 }
 .can {
   position: relative;
@@ -196,22 +193,12 @@ button { font: inherit; }
   color: rgba(255, 255, 255, 0.5);
 }
 
-.can-cell.is-armed .can {
+.can-cell.is-launching .can {
   outline-color: var(--lcd-green);
   box-shadow: 0 0 4px var(--lcd-green), 0 0 16px var(--lcd-green-dim), 0 3px 6px rgba(0, 0, 0, 0.45);
   transform: translateY(-4px);
 }
-.can-cell.is-armed .can-code { color: var(--lcd-green); }
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
-}
-.can-cell.is-shake .can { animation: shake 0.3s; }
-@media (prefers-reduced-motion: reduce) {
-  .can-cell.is-shake .can { animation: none; }
-}
+.can-cell.is-launching .can-code { color: var(--lcd-green); }
 
 .status-strip {
   margin: 10px 0 0;
@@ -334,17 +321,71 @@ button { font: inherit; }
   text-transform: uppercase;
   color: rgba(0, 0, 0, 0.16);
 }
-.tray-message {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 15px;
-  letter-spacing: 0.02em;
-  color: var(--ink);
-  animation: pop-in 0.35s var(--ease-pop);
+.tray-can-wrap[hidden] { display: none; }
+.tray-can-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  animation: pop-in 0.3s var(--ease-pop);
 }
 @keyframes pop-in {
   from { transform: scale(0.7); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
+}
+
+.tray-can {
+  all: unset;
+  cursor: pointer;
+  position: relative;
+  width: 54px;
+  aspect-ratio: 0.42;
+  border-radius: 10px 10px 4px 4px;
+  background: var(--can, #999);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s var(--ease-soft);
+  animation: tray-pulse 1.8s ease-out infinite;
+}
+.tray-can::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 8px;
+  background: #c7c7c7;
+  border-radius: 2px;
+}
+.tray-can::after {
+  content: attr(data-label);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--can-ink, #fff);
+  padding: 0 3px;
+  text-align: center;
+}
+.tray-can:hover { transform: translateY(-3px); animation-play-state: paused; }
+.tray-can:active,
+.tray-can.is-clicked { transform: translateY(1px) scale(0.94); }
+@keyframes tray-pulse {
+  0%, 100% { box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(73, 226, 106, 0.55); }
+  50% { box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4), 0 0 0 7px rgba(73, 226, 106, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tray-can { animation: none; }
+}
+.tray-can-hint {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.35);
 }
 
 .flying-can {
