@@ -199,16 +199,22 @@ function placeInTray(item) {
   trayCan.style.setProperty('--can', item.color);
   trayCan.style.setProperty('--can-ink', item.ink);
   trayCan.dataset.label = item.label;
+  trayCan.href = item.url || '#';
   trayCan.setAttribute('aria-label', `Open ${item.label}`);
 
   renderLcd();
   statusStrip.textContent = `${item.label} in the tray — click it →`;
 }
 
-trayCan.addEventListener('click', () => {
-  if (!currentTrayItem) return;
-  if (currentTrayItem.url && currentTrayItem.url !== '#') {
-    window.open(currentTrayItem.url, '_blank', 'noopener');
+trayCan.addEventListener('click', (e) => {
+  if (!currentTrayItem) {
+    e.preventDefault();
+    return;
+  }
+  if (!currentTrayItem.url || currentTrayItem.url === '#') {
+    e.preventDefault();
+    flashLcd('LINK COMING SOON', { invalid: true, duration: 1600 });
+    return;
   }
   trayCan.classList.add('is-clicked');
   setTimeout(() => trayCan.classList.remove('is-clicked'), 200);
