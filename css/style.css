@@ -31,6 +31,7 @@
 
   --font-display: 'Anton', 'Arial Narrow', sans-serif;
   --font-mono: 'Space Mono', 'Courier New', monospace;
+  --font-label: 'Quicksand', 'Nunito', sans-serif;
 
   --ease-soft: cubic-bezier(.16, 1, .3, 1);
   --ease-pop: cubic-bezier(.34, 1.56, .64, 1);
@@ -153,38 +154,70 @@ button { font: inherit; }
   border-radius: 8px;
   cursor: pointer;
 }
+.can,
+.tray-can,
+.flying-can {
+  background-color: var(--can, #999);
+  background-image:
+    linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.65) 20%, rgba(255, 255, 255, 0.14) 33%, transparent 48%),
+    linear-gradient(100deg, var(--can-dark, #555) 0%, var(--can, #999) 24%, var(--can-light, #ccc) 44%, var(--can, #999) 66%, var(--can-dark, #555) 100%);
+}
 .can {
   position: relative;
   width: 100%;
   max-width: 58px;
   aspect-ratio: 0.42;
-  border-radius: 10px 10px 4px 4px;
-  background: var(--can, #999);
+  border-radius: 22% 22% 10% 10%;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45);
   transition: transform 0.25s var(--ease-pop), box-shadow 0.25s var(--ease-soft), outline-color 0.2s;
   outline: 3px solid transparent;
   outline-offset: 2px;
 }
-.can-cap {
+.can::after {
+  content: "";
   position: absolute;
-  top: -6px;
+  left: 4%;
+  right: 4%;
+  bottom: 0;
+  height: 16%;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.4));
+  pointer-events: none;
+}
+.can-cap,
+.tray-can::before,
+.flying-can::before {
+  content: "";
+  position: absolute;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 60%;
-  height: 8px;
-  background: #c7c7c7;
-  border-radius: 2px;
+  width: 92%;
+  height: 16%;
+  border-radius: 50%;
+  background-image:
+    radial-gradient(ellipse at 36% 30%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.5) 18%, transparent 36%),
+    radial-gradient(ellipse at 50% 60%, #dddde3 0%, #b9b9c1 45%, #8d8d96 78%, #68686f 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.55),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.35),
+    0 1px 2px rgba(0, 0, 0, 0.3);
 }
 .can-label {
+  position: relative;
+  z-index: 1;
   color: var(--can-ink, #fff);
-  font-family: var(--font-display);
-  font-size: 10.5px;
+  text-shadow: var(--label-shadow, 0 1px 3px rgba(0, 0, 0, 0.55));
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1.1;
   letter-spacing: 0.01em;
   text-align: center;
-  padding: 0 3px;
+  padding: 0 4px;
   word-break: break-word;
 }
 .can-code {
@@ -353,34 +386,27 @@ button { font: inherit; }
   position: relative;
   width: 54px;
   aspect-ratio: 0.42;
-  border-radius: 10px 10px 4px 4px;
-  background: var(--can, #999);
+  border-radius: 22% 22% 10% 10%;
+  overflow: hidden;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
   transition: transform 0.2s var(--ease-soft);
   animation: tray-pulse 1.8s ease-out infinite;
-}
-.tray-can::before {
-  content: "";
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 8px;
-  background: #c7c7c7;
-  border-radius: 2px;
 }
 .tray-can::after {
   content: attr(data-label);
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-display);
-  font-size: 10px;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1.1;
   color: var(--can-ink, #fff);
-  padding: 0 3px;
+  text-shadow: var(--label-shadow, 0 1px 3px rgba(0, 0, 0, 0.55));
+  padding: 0 4px;
   text-align: center;
 }
 .tray-can:hover { transform: translateY(-3px); animation-play-state: paused; }
@@ -404,7 +430,8 @@ button { font: inherit; }
 .flying-can {
   position: fixed;
   z-index: 999;
-  border-radius: 10px 10px 4px 4px;
+  border-radius: 22% 22% 10% 10%;
+  overflow: hidden;
   pointer-events: none;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
 }

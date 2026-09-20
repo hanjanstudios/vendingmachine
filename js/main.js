@@ -6,13 +6,41 @@
    ============================================================ */
 
 const ITEMS = [
-  { code: 'A1', label: 'BLOG', color: '#d9362c', ink: '#fff', url: 'https://hannahjanicke.com' },
-  { code: 'A2', label: 'TOOL', color: '#2f6fb3', ink: '#fff', url: 'https://tool.hannahjanicke.com' },
-  { code: 'A3', label: 'ARTLAB', color: '#e8842a', ink: '#fff', url: 'https://artlab.hannahjanicke.com' },
-  { code: 'A4', label: 'REALTY', color: '#2f7d4f', ink: '#fff', url: 'https://realty.hannahjanicke.com' },
-  { code: 'A5', label: 'PDFSPACE', color: '#7c3fa1', ink: '#fff', url: 'http://pdfspace.hannahjanicke.com' },
-  { code: 'A6', label: 'ARTFORGE', color: '#e0b93c', ink: '#1c1c1c', url: 'https://artforge-hannah-5d0e.vercel.app' },
+  { code: 'A1', label: 'Blog', color: '#d9362c', ink: '#fff', url: 'https://hannahjanicke.com' },
+  { code: 'A2', label: 'Tool', color: '#2f6fb3', ink: '#fff', url: 'https://tool.hannahjanicke.com' },
+  { code: 'A3', label: 'Art Lab', color: '#e8842a', ink: '#fff', url: 'https://artlab.hannahjanicke.com' },
+  { code: 'A4', label: 'Realty', color: '#2f7d4f', ink: '#fff', url: 'https://realty.hannahjanicke.com' },
+  { code: 'A5', label: 'PDF Space', color: '#7c3fa1', ink: '#fff', url: 'http://pdfspace.hannahjanicke.com' },
+  { code: 'A6', label: 'Art Forge', color: '#e0b93c', ink: '#1c1c1c', url: 'https://artforge-hannah-5d0e.vercel.app' },
 ];
+
+/* ---------- Can shading ---------- */
+function shade(hex, amt) {
+  const num = parseInt(hex.slice(1), 16);
+  let r = (num >> 16) & 0xff, g = (num >> 8) & 0xff, b = num & 0xff;
+  const target = amt < 0 ? 0 : 255;
+  const p = Math.abs(amt);
+  r = Math.round((target - r) * p) + r;
+  g = Math.round((target - g) * p) + g;
+  b = Math.round((target - b) * p) + b;
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+ITEMS.forEach((item) => {
+  item.light = shade(item.color, 0.55);
+  item.dark = shade(item.color, -0.45);
+  item.labelShadow = item.ink === '#fff'
+    ? '0 1px 3px rgba(0, 0, 0, 0.55), 0 0 6px rgba(0, 0, 0, 0.3)'
+    : '0 1px 2px rgba(255, 255, 255, 0.5)';
+});
+
+function paintCan(el, item) {
+  el.style.setProperty('--can', item.color);
+  el.style.setProperty('--can-light', item.light);
+  el.style.setProperty('--can-dark', item.dark);
+  el.style.setProperty('--can-ink', item.ink);
+  el.style.setProperty('--label-shadow', item.labelShadow);
+}
 
 const KEYS = ['A', 'B', 'C', '1', '2', '3', '4', '5', '6', '⌫', '0', 'OK'];
 
@@ -44,8 +72,7 @@ ITEMS.forEach((item) => {
 
   const can = document.createElement('span');
   can.className = 'can';
-  can.style.setProperty('--can', item.color);
-  can.style.setProperty('--can-ink', item.ink);
+  paintCan(can, item);
 
   const cap = document.createElement('span');
   cap.className = 'can-cap';
@@ -182,7 +209,7 @@ function dropIntoTray(item) {
 
   const flying = document.createElement('div');
   flying.className = 'flying-can';
-  flying.style.background = item.color;
+  paintCan(flying, item);
   flying.style.width = `${startRect.width}px`;
   flying.style.height = `${startRect.height}px`;
   flying.style.left = `${startRect.left}px`;
@@ -216,8 +243,7 @@ function placeInTray(item) {
   trayCanWrap.style.animation = 'none';
   requestAnimationFrame(() => { trayCanWrap.style.animation = ''; });
 
-  trayCan.style.setProperty('--can', item.color);
-  trayCan.style.setProperty('--can-ink', item.ink);
+  paintCan(trayCan, item);
   trayCan.dataset.label = item.label;
   trayCan.href = item.url || '#';
   trayCan.setAttribute('aria-label', `Open ${item.label}`);
