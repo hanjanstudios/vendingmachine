@@ -3,19 +3,15 @@
    Type a code (A1–A6), press OK — the can drops into the tray.
    Click the can in the tray to open its link.
    No build step, no external JS.
-
-   NOTE: swap every url: '#' below for the real destination once
-   you have it — including confirming what "TOOL" (A2) should
-   actually link to.
    ============================================================ */
 
 const ITEMS = [
   { code: 'A1', label: 'BLOG', color: '#d9362c', ink: '#fff', url: 'https://hannahjanicke.com' },
-  { code: 'A2', label: 'TOOL', color: '#2f6fb3', ink: '#fff', url: '#' },
-  { code: 'A3', label: 'ARTLAB', color: '#e8842a', ink: '#fff', url: '#' },
-  { code: 'A4', label: 'REALTY', color: '#2f7d4f', ink: '#fff', url: '#' },
-  { code: 'A5', label: 'PDFSPACE', color: '#7c3fa1', ink: '#fff', url: '#' },
-  { code: 'A6', label: 'ARTFORGE', color: '#e0b93c', ink: '#1c1c1c', url: '#' },
+  { code: 'A2', label: 'TOOL', color: '#2f6fb3', ink: '#fff', url: 'https://tool.hannahjanicke.com' },
+  { code: 'A3', label: 'ARTLAB', color: '#e8842a', ink: '#fff', url: 'https://artlab.hannahjanicke.com' },
+  { code: 'A4', label: 'REALTY', color: '#2f7d4f', ink: '#fff', url: 'https://realty.hannahjanicke.com' },
+  { code: 'A5', label: 'PDFSPACE', color: '#7c3fa1', ink: '#fff', url: 'http://pdfspace.hannahjanicke.com' },
+  { code: 'A6', label: 'ARTFORGE', color: '#e0b93c', ink: '#1c1c1c', url: 'https://artforge-hannah-5d0e.vercel.app' },
 ];
 
 const KEYS = ['A', 'B', 'C', '1', '2', '3', '4', '5', '6', '⌫', '0', 'OK'];
