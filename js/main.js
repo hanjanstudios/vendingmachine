@@ -31,6 +31,8 @@ let buffer = '';
 let busy = false;
 let currentTrayItem = null;
 let lcdRevertTimer = null;
+let statusRevertTimer = null;
+let defaultStatusText = 'enter code to dispense';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -60,6 +62,7 @@ ITEMS.forEach((item) => {
 
   cell.appendChild(can);
   cell.appendChild(code);
+  cell.addEventListener('click', () => nudgeForCode(cell));
   cansGrid.appendChild(cell);
   cellByCode[item.code] = cell;
 });
@@ -111,6 +114,27 @@ function onKey(k, btn) {
   }
 }
 
+function setStatus(text) {
+  clearTimeout(statusRevertTimer);
+  defaultStatusText = text;
+  statusStrip.classList.remove('is-invalid');
+  statusStrip.textContent = text;
+}
+
+function nudgeForCode(cell) {
+  clearTimeout(statusRevertTimer);
+  statusStrip.classList.add('is-invalid');
+  statusStrip.textContent = 'please enter code';
+
+  cell.classList.add('is-shake');
+  setTimeout(() => cell.classList.remove('is-shake'), 320);
+
+  statusRevertTimer = setTimeout(() => {
+    statusStrip.classList.remove('is-invalid');
+    statusStrip.textContent = defaultStatusText;
+  }, 1600);
+}
+
 function renderLcd() {
   clearTimeout(lcdRevertTimer);
   lcd.classList.remove('is-invalid');
@@ -142,7 +166,7 @@ function submitCode() {
 function dropIntoTray(item) {
   const cell = cellByCode[item.code];
   flashLcd(`${item.code} DISPENSING`, { duration: 1800 });
-  statusStrip.textContent = `${item.label} is dropping…`;
+  setStatus(`${item.label} is dropping…`);
 
   if (reducedMotion) {
     placeInTray(item);
@@ -199,7 +223,7 @@ function placeInTray(item) {
   trayCan.setAttribute('aria-label', `Open ${item.label}`);
 
   renderLcd();
-  statusStrip.textContent = `${item.label} in the tray — click it →`;
+  setStatus(`${item.label} in the tray — click it →`);
 }
 
 trayCan.addEventListener('click', (e) => {

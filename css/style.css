@@ -151,6 +151,7 @@ button { font: inherit; }
   gap: 5px;
   padding: 8px 2px;
   border-radius: 8px;
+  cursor: pointer;
 }
 .can {
   position: relative;
@@ -200,6 +201,16 @@ button { font: inherit; }
 }
 .can-cell.is-launching .can-code { color: var(--lcd-green); }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+.can-cell.is-shake .can { animation: shake 0.3s; }
+@media (prefers-reduced-motion: reduce) {
+  .can-cell.is-shake .can { animation: none; }
+}
+
 .status-strip {
   margin: 10px 0 0;
   text-align: center;
@@ -208,7 +219,9 @@ button { font: inherit; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--lcd-green-dim);
+  transition: color 0.15s;
 }
+.status-strip.is-invalid { color: var(--lcd-red); }
 
 /* ---------- Display + keypad + menu ---------- */
 .display-label {
